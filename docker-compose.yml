@@ -1,0 +1,51 @@
+version: "2.1"
+
+volumes:
+  oss_db_v:
+    driver: local
+  oss_sftp_v:
+    driver: local
+
+services:
+  web:
+    build: "./web/"
+    container_name: "oss_web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./shared/logs/apache2:/var/log/apache2"
+      - "oss_sftp_v:/var/www/html"
+    links:
+      - "db"
+      - "mail"
+
+  db:
+    image: "mysql:5.7"
+    container_name: "oss_db"
+    environment: 
+      - "MYSQL_ROOT_PASSWORD=password"
+      - "MYSQL_DATABASE=oss_dev"
+      - "MYSQL_USER=oss_dev_user"
+      - "MYSQL_PASSWORD=password"
+    ports:
+      - "3306:3306"  
+    volumes:
+      - "oss_db_v:/var/lib/mysql"
+      - "./shared/logs/mysql:/var/log/mysql"
+    command: "mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+  
+  sftp:
+    image: "atmoz/sftp"
+    container_name: "oss_sftp"
+    ports:
+      - "2222:22"
+    volumes: 
+      - "oss_sftp_v:/home/sftp-user/upload"
+    command: "sftp-user:sftp:::upload"
+
+  mail:
+    image: "schickling/mailcatcher"
+    container_name: "oss_mail"
+    ports:
+      - "1080:1080"
