@@ -17,7 +17,7 @@ RUN apt-get install -y sendmail
 RUN cd /usr/local/bin && \
     curl -sS https://getcomposer.org/installer | php
 
-RUN rm -rf /var/lib/apt/lists/* \
+RUN rm -rf /var/lib/apt/lists/* 
 
 ADD mail.ini /usr/local/etc/php/conf.d/
 
